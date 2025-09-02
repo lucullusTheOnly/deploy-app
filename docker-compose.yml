@@ -1,0 +1,18 @@
+services:
+  frontend:
+    #image: httpd:latest
+    build: ./frontend/
+    container_name: frontend
+    volumes:
+    - ./frontend/index.html:/usr/local/apache2/htdocs/index.html:Z
+    ports:
+    - 8280:80
+
+  backend:
+    build: ./backend/
+    container_name: backend
+    volumes:
+    - ./backend/app.py:/usr/src/myapp/app.py:Z
+    command: python /usr/src/myapp/app.py
+    ports:
+    - 8281:5000
