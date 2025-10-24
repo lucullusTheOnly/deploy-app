@@ -5,6 +5,7 @@ services:
     container_name: frontend
     volumes:
     - ./frontend/index.html:/usr/local/apache2/htdocs/index.html:Z
+    - ./frontend/httpd.conf:/usr/local/apache2/conf/httpd.conf:Z
     ports:
     - 8280:80
 

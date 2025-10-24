@@ -1,50 +1,110 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Deploy of application A</title>
-  <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.6/dist/full.css" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deploy of application A</title>
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/daisyui@2.51.6/dist/full.css" rel="stylesheet">
 </head>
 <body class="bg-base-200 min-h-screen flex items-center justify-center">
-  <div class="card w-full max-w-md shadow-xl bg-base-100 p-6">
-    <h1 class="text-2xl font-bold text-center mb-6">Deploy of application A</h1>
+<div class="card w-full max-w-md shadow-xl bg-base-100 p-6">
+<h1 class="text-2xl font-bold text-center mb-6">Deploy of application A</h1>
 
-    <form hx-post="http://localhost:8281/deploy" hx-target="#response" hx-swap="innerHTML" class="space-y-4">
-      <!-- Free text input -->
-      <div class="form-control">
-        <label class="label"><span class="label-text">Description</span></label>
-        <input type="text" name="description" placeholder="Enter description" class="input input-bordered w-full" required />
-      </div>
-
-      <!-- Multiple choice input -->
-      <div class="form-control">
-        <label class="label"><span class="label-text">Environment</span></label>
-        <select name="environment" class="select select-bordered w-full" required>
-          <option disabled selected>Pick an environment</option>
-          <option value="dev">Development</option>
-          <option value="staging">Staging</option>
-          <option value="prod">Production</option>
-        </select>
-      </div>
-
-      <!-- Number input -->
-      <div class="form-control">
-        <label class="label"><span class="label-text">Number of replicas</span></label>
-        <input type="number" name="replicas" min="1" max="20" value="1" class="input input-bordered w-full" required />
-      </div>
-
-      <!-- Submit button -->
-      <div class="form-control mt-6">
-        <button type="submit" class="btn btn-success w-full">Deploy</button>
-      </div>
-    </form>
-
-    <!-- Response from backend -->
-    <div id="response" class="mt-4 text-center"></div>
+<form id="deployForm" class="space-y-4">
+  <!-- Free text input -->
+  <div class="form-control">
+    <label class="label"><span class="label-text">Branch</span></label>
+    <input type="text" id="branch" class="input input-bordered w-full" required />
   </div>
-</body>
-</html>
 
+  <!-- Multiple choice input -->
+  <div class="form-control">
+    <label class="label"><span class="label-text">Environment</span></label>
+    <select id="environment" class="select select-bordered w-full" required>
+      <option disabled selected>Pick an environment</option>
+      <option value="dev">DEV</option>
+      <option value="staging">QA</option>
+      <option value="prod">PROD</option>
+    </select>
+  </div>
+
+  <!-- Number input -->
+  <!--<div class="form-control">
+    <label class="label"><span class="label-text">Number of replicas</span></label>
+    <input type="number" id="replicas" min="1" max="20" value="1" class="input input-bordered w-full" required />
+  </div>-->
+  
+  <div class="form-control">
+    <label class="label"><span class="label-text">Change description</span></label>
+    <input type="text" id="changeDescription" class="input input-bordered w-full" required />
+  </div>
+
+  <div class="form-control">
+    <label class="label"><span class="label-text">Release Status Jira Issue Key</span></label>
+    <input type="text" id="jira_issue_key" class="input input-bordered w-full" required />
+  </div>
+
+  <div class="form-control">
+    <label class="label"><span class="label-text">Change ID</span></label>
+    <input type="text" id="changeId" class="input input-bordered w-full" required />
+  </div>
+
+  <div class="form-control">
+    <label class="label"><span class="label-text">Version</span></label>
+    <input type="text" id="version" class="input input-bordered w-full" required />
+  </div>
+
+  <div class="form-control">
+    <label class="label"><span class="label-text">Change Item</span></label>
+    <input type="text" id="changeItem" class="input input-bordered w-full" required />
+  </div>
+
+  <!-- Submit button -->
+  <div class="form-control mt-6">
+    <button type="submit" class="btn btn-success w-full">Deploy</button>
+  </div>
+</form>
+
+<!-- Response UI -->
+<div id="response" class="mt-4 text-center"></div>
+</body>
+
+<script>
+document.getElementById("deployForm").addEventListener("submit", async function(event) {
+  event.preventDefault(); // stop normal form submit
+
+  // Build your custom JSON structure
+  const payload = {
+    branch: document.getElementById("branch").value,
+    repository: "pames-releaseman",
+    env: [
+      {"name": "environment", "value": document.getElementById("environment").value},
+      {"name": "changeDescription", "value": document.getElementById("changeDescription").value},
+      {"name": "releaseStatusJiraIssueKey", "value": document.getElementById("jira_issue_key").value},
+      {"name": "changeId", "value": document.getElementById("changeId").value},
+      {"name": "version", "value": document.getElementById("version").value},
+      {"name": "changeItem", "value": document.getElementById("changeItem").value}
+    ]
+  };
+
+  const responseElement = document.getElementById("response");
+
+  try {
+    const response = await fetch("http://localhost:5000/build", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) throw new Error("Deployment failed");
+    const result = await response.text();
+
+    responseElement.innerHTML = `<div class='alert alert-success'>✅ Deployment started!</div>`;
+  } catch (error) {
+    responseElement.innerHTML = `<div class='alert alert-error'>❌ ${error.message}</div>`;
+  }
+});
+</script>
+</html>
