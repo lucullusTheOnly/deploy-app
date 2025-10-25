@@ -9,10 +9,7 @@ logging.basicConfig(level=logging.INFO)
 
 @app.route("/build", methods=["POST"])
 def build():
-    description = request.form.get("description")
-    environment = request.form.get("environment")
-    replicas = request.form.get("replicas")
-    data = request.json()
+    data = request.json
     data["status"] = "ok"
     app.logger.info(str(data))
     return data

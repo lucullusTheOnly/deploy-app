@@ -16,4 +16,4 @@ services:
     - ./backend/app.py:/usr/src/myapp/app.py:Z
     command: python /usr/src/myapp/app.py
     ports:
-    - 8281:5000
+    - 5000:5000
