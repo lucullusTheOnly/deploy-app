@@ -3,9 +3,9 @@ services:
     #image: httpd:latest
     build: ./frontend/
     container_name: frontend
-    volumes:
-    - ./frontend/index.html:/usr/local/apache2/htdocs/index.html:Z
-    - ./frontend/httpd.conf:/usr/local/apache2/conf/httpd.conf:Z
+    environment:
+      API_HOST: "http://localhost:5000/build"
+      API_KEY: "a1b2c3d4e5f6g7"
     ports:
     - 8280:80
 

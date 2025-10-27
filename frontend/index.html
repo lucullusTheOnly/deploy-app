@@ -92,7 +92,7 @@ document.getElementById("deployForm").addEventListener("submit", async function(
   const responseElement = document.getElementById("response");
 
   try {
-    const response = await fetch("http://localhost:5000/build", {
+    const response = await fetch("$API_HOST"+"?secret="+"$API_KEY", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
